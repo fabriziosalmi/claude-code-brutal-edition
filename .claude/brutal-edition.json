@@ -1,0 +1,48 @@
+{
+  "name": "claude-code-brutal-edition",
+  "version": "1.0.0-brutal",
+  "description": "Claude Code with enterprise-grade engineering standards enforcement. Zero tolerance for vibecoding anti-patterns.",
+  "edition": "BRUTAL",
+  "features": [
+    "Zero hardcoded secrets enforcement",
+    "SQL/Command injection prevention",
+    "Structured logging framework",
+    "Input validation with allowlist",
+    "SOTA architectural patterns",
+    "Enterprise documentation standards",
+    "Security-first approach",
+    "No silent failures"
+  ],
+  "standards": {
+    "codeQuality": "CODE_QUALITY_STANDARDS.md",
+    "documentation": "DOCUMENTATION_STANDARDS.md",
+    "engineering": ".claude/ENGINEERING_STANDARDS.md",
+    "contributing": "CONTRIBUTING.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabriziosalmi/claude-code-brutal-edition"
+  },
+  "upstream": {
+    "name": "@anthropic-ai/claude-code",
+    "repository": "https://github.com/anthropics/claude-code"
+  },
+  "maintainers": [
+    {
+      "name": "Fabrizio Salmi",
+      "url": "https://github.com/fabriziosalmi"
+    }
+  ],
+  "keywords": [
+    "claude",
+    "anthropic",
+    "ai",
+    "code-generation",
+    "enterprise",
+    "sota",
+    "security",
+    "quality",
+    "brutal-edition"
+  ],
+  "license": "See LICENSE.md"
+}

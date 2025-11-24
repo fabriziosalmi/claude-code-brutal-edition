@@ -209,19 +209,27 @@ class RuleEngine:
                 transcript_path = input_data.get('transcript_path')
                 if transcript_path:
                     try:
-                        with open(transcript_path, 'r') as f:
+                        with open(transcript_path, 'r', encoding='utf-8') as f:
                             return f.read()
                     except FileNotFoundError:
-                        print(f"Warning: Transcript file not found: {transcript_path}", file=sys.stderr)
+                        from hookify.utils.logging import StructuredLogger, LogLevel
+                        logger = StructuredLogger("rule_engine", LogLevel.WARNING)
+                        logger.warning("Transcript file not found", {"path": transcript_path})
                         return ''
                     except PermissionError:
-                        print(f"Warning: Permission denied reading transcript: {transcript_path}", file=sys.stderr)
+                        from hookify.utils.logging import StructuredLogger, LogLevel
+                        logger = StructuredLogger("rule_engine", LogLevel.WARNING)
+                        logger.warning("Permission denied reading transcript", {"path": transcript_path})
                         return ''
                     except (IOError, OSError) as e:
-                        print(f"Warning: Error reading transcript {transcript_path}: {e}", file=sys.stderr)
+                        from hookify.utils.logging import StructuredLogger, LogLevel
+                        logger = StructuredLogger("rule_engine", LogLevel.WARNING)
+                        logger.warning("Error reading transcript file", {"path": transcript_path, "error": str(e)})
                         return ''
                     except UnicodeDecodeError as e:
-                        print(f"Warning: Encoding error in transcript {transcript_path}: {e}", file=sys.stderr)
+                        from hookify.utils.logging import StructuredLogger, LogLevel
+                        logger = StructuredLogger("rule_engine", LogLevel.ERROR)
+                        logger.error("Encoding error in transcript file", {"path": transcript_path}, error=e)
                         return ''
             elif field == 'user_prompt':
                 # For UserPromptSubmit events
@@ -262,14 +270,38 @@ class RuleEngine:
 
         Returns:
             True if pattern matches
+
+        Raises:
+            None - logs errors and returns False on invalid patterns
         """
         try:
+            # Validate pattern before compiling
+            from hookify.utils.validation import InputValidator
+            validation_errors = InputValidator.validate_regex_pattern(pattern)
+            
+            if validation_errors:
+                # Log validation errors but don't fail - return False
+                from hookify.utils.logging import StructuredLogger, LogLevel
+                logger = StructuredLogger("rule_engine", LogLevel.WARNING)
+                for error in validation_errors:
+                    if error.severity == "error":
+                        logger.error("Invalid regex pattern", {
+                            "pattern": pattern,
+                            "error": error.message
+                        })
+                        return False
+                    
             # Use cached compiled regex (LRU cache with max 128 patterns)
             regex = compile_regex(pattern)
             return bool(regex.search(text))
 
         except re.error as e:
-            print(f"Invalid regex pattern '{pattern}': {e}", file=sys.stderr)
+            from hookify.utils.logging import StructuredLogger, LogLevel
+            logger = StructuredLogger("rule_engine", LogLevel.ERROR)
+            logger.error("Regex compilation failed", {
+                "pattern": pattern,
+                "text_length": len(text)
+            }, error=e)
             return False
 
 
